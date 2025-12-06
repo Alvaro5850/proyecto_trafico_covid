@@ -1,0 +1,23 @@
+01_heatmap_mes_vs_ano
+Mapa de calor que muestra cómo cambia la intensidad media según el mes y el año.
+→ Sirve para ver estacionalidad y el desplome de 2020.
+
+02_heatmap_hora_vs_periodo
+Mapa de calor de horas del día vs periodo COVID.
+→ Se ve cómo las horas punta desaparecen durante el confinamiento.
+
+03_boxplot_por_periodo
+Boxplot de la intensidad diaria según el periodo COVID.
+→ Muestra la distribución (mediana, dispersión) antes, durante y después del COVID.
+
+04_laboral_vs_findes
+Comparativa de la intensidad media diaria en laborables, sábados y domingos.
+→ Valida que el modelo detecta bien el ciclo semanal de movilidad.
+
+05_top10_dias_mas_intensos
+Ranking de los 10 días con mayor tráfico medio.
+→ Ideal para comentar picos extremos de congestión.
+
+06_intensidad_anual
+Gráfico de la intensidad media anual.
+→ Resume la historia: 2019 normal, 2020 hundido, 2021–2022 recuperación.
