@@ -22,8 +22,8 @@ def main():
         .csv("data/raw/*/*.csv")
     )
 
-    print("👉 Filas leídas inicialmente:", df.count())
-    print("👉 Columnas:", df.columns)
+    print("Filas leídas inicialmente:", df.count())
+    print("Columnas:", df.columns)
 
     df = df.select(
         "id",
@@ -37,15 +37,14 @@ def main():
         "periodo_integracion"
     )
 
-    # ❗ IMPORTANTE: formato correcto yyyy-MM-dd HH:mm:ss
     df = df.withColumn("fecha_ts", to_timestamp(col("fecha"), "yyyy-MM-dd HH:mm:ss"))
 
-    print("👉 Ejemplo de fechas parseadas:")
+    print("Ejemplo de fechas parseadas:")
     df.select("fecha", "fecha_ts").show(5, truncate=False)
 
     df = df.withColumn("intensidad", col("intensidad").cast("double"))
     df = df.filter(col("intensidad").isNotNull())
-    print("👉 Filas tras filtrar intensidad no nula:", df.count())
+    print("Filas tras filtrar intensidad no nula:", df.count())
 
     df = df.withColumn("year", year("fecha_ts"))
     df = df.withColumn("month", month("fecha_ts"))
@@ -53,12 +52,12 @@ def main():
     df = df.withColumn("hour", hour("fecha_ts"))
 
     df = df.filter((col("year") >= 2019) & (col("year") <= 2022))
-    print("👉 Filas tras filtrar años 2019–2022:", df.count())
+    print("Filas tras filtrar años 2019–2022:", df.count())
 
     df = df.withColumn("fecha_ymd", date_format(col("fecha_ts"), "yyyy-MM-dd"))
     df = df.withColumn("fecha_dia", col("fecha_ymd"))
 
-    print("👉 Filas listas para agrupar (2019–2022, intensidad!=null):", df.count())
+    print("Filas listas para agrupar (2019–2022, intensidad!=null):", df.count())
 
     df = df.withColumn(
         "periodo_covid",
@@ -82,7 +81,7 @@ def main():
     )
 
     df.cache()
-    print("👉 Filas totales (con periodo_covid):", df.count())
+    print("Filas totales (con periodo_covid):", df.count())
 
     resumen_periodos = (
         df.groupBy("periodo_covid")
@@ -119,7 +118,7 @@ def main():
     intensidad_diaria.write.mode("overwrite").option("header", "true") \
         .csv("output/intensidad_diaria")
 
-    print("✅ Spark terminado. CSV generados en carpeta 'output/'.")
+    print(" Spark terminado. CSV generados en carpeta 'output/'.")
     spark.stop()
 
 

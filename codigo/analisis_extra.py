@@ -241,10 +241,6 @@ def heatmap_hora_vs_periodo(df_horaria: pd.DataFrame):
     print("📊 Heatmap guardado:", ruta)
 
 
-# =========================
-# Escritura del Excel
-# =========================
-
 def crear_excel_completo(df_res, df_mensual, df_horaria, df_diaria,
                          df_anual, df_lab, top_mas, top_menos, df_comp):
     with pd.ExcelWriter(EXCEL_SALIDA, engine="openpyxl") as writer:
@@ -259,12 +255,8 @@ def crear_excel_completo(df_res, df_mensual, df_horaria, df_diaria,
         top_menos.to_excel(writer, sheet_name="Top10_dias_menos_carga", index=False)
         df_comp.to_excel(writer, sheet_name="Comparativa_Pre_Post", index=False)
 
-    print(f"✅ Excel completo generado en: {EXCEL_SALIDA}")
+    print(f" Excel completo generado en: {EXCEL_SALIDA}")
 
-
-# =========================
-# Main
-# =========================
 
 def main():
     df_res, df_mensual, df_horaria, df_diaria = cargar_datos_base()
@@ -283,7 +275,7 @@ def main():
     heatmap_mes_vs_ano(df_mensual)
     heatmap_hora_vs_periodo(df_horaria)
 
-    print("🔥 Análisis extra generado (Excel + gráficas extra).")
+    print(" Análisis extra generado (Excel + gráficas extra).")
 
 
 if __name__ == "__main__":

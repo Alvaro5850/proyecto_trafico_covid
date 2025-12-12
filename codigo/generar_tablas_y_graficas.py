@@ -2,10 +2,6 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# =====================
-#  CONFIGURACIÓN BASE
-# =====================
-
 BASE_OUTPUT = "output"
 EXCEL_SALIDA = os.path.join(BASE_OUTPUT, "resultados_trafico.xlsx")
 CARPETA_GRAFICAS = os.path.join(BASE_OUTPUT, "graficas")
@@ -14,11 +10,6 @@ os.makedirs(CARPETA_GRAFICAS, exist_ok=True)
 
 plt.rcParams["figure.figsize"] = (10, 6)
 plt.rcParams["font.size"] = 11
-
-
-# =====================
-#  UTILIDADES
-# =====================
 
 def leer_csv_unico(ruta_carpeta: str) -> pd.DataFrame:
     """
@@ -39,10 +30,6 @@ def formatear_numeros(df: pd.DataFrame, columnas, decimales: int = 2) -> pd.Data
             df[c] = df[c].astype(float).round(decimales)
     return df
 
-
-# =====================
-#  CREACIÓN DEL EXCEL
-# =====================
 
 def crear_excel():
     writer = pd.ExcelWriter(EXCEL_SALIDA, engine="openpyxl")
@@ -70,13 +57,8 @@ def crear_excel():
     df_diaria.to_excel(writer, sheet_name="Intensidad_diaria", index=False)
 
     writer.close()
-    print(f"✅ Excel generado en: {EXCEL_SALIDA}")
+    print(f" Excel generado en: {EXCEL_SALIDA}")
     return df_res, df_mensual, df_horaria, df_diaria
-
-
-# =====================
-#  GRÁFICAS
-# =====================
 
 def grafica_barras_resumen(df_res: pd.DataFrame):
     """
@@ -87,7 +69,7 @@ def grafica_barras_resumen(df_res: pd.DataFrame):
       pero solo con los periodos que existan realmente.
     """
     if "periodo_covid" not in df_res.columns:
-        print("⚠️ No se encuentra la columna 'periodo_covid' en df_res. Saltando gráfico 01.")
+        print(" No se encuentra la columna 'periodo_covid' en df_res. Saltando gráfico 01.")
         return
 
     # Agregamos por si hay varias filas por periodo
@@ -143,7 +125,7 @@ def grafica_barras_resumen(df_res: pd.DataFrame):
     ruta = os.path.join(CARPETA_GRAFICAS, "01_intensidad_por_periodo.png")
     plt.savefig(ruta, dpi=220)
     plt.close()
-    print("📊 Gráfico guardado:", ruta)
+    print(" Gráfico guardado:", ruta)
 
 
 def grafica_lineas_mensual(df_mensual: pd.DataFrame):
@@ -167,7 +149,7 @@ def grafica_lineas_mensual(df_mensual: pd.DataFrame):
     ruta = os.path.join(CARPETA_GRAFICAS, "02_intensidad_mensual_por_ano.png")
     plt.savefig(ruta, dpi=220)
     plt.close()
-    print("📊 Gráfico guardado:", ruta)
+    print(" Gráfico guardado:", ruta)
 
 
 def grafica_curva_horaria(df_horaria: pd.DataFrame):
@@ -191,7 +173,7 @@ def grafica_curva_horaria(df_horaria: pd.DataFrame):
     ruta = os.path.join(CARPETA_GRAFICAS, "03_curva_horaria_por_periodo.png")
     plt.savefig(ruta, dpi=220)
     plt.close()
-    print("📊 Gráfico guardado:", ruta)
+    print(" Gráfico guardado:", ruta)
 
 
 def grafica_intensidad_diaria(df_diaria: pd.DataFrame):
@@ -212,12 +194,7 @@ def grafica_intensidad_diaria(df_diaria: pd.DataFrame):
     ruta = os.path.join(CARPETA_GRAFICAS, "04_intensidad_diaria.png")
     plt.savefig(ruta, dpi=220)
     plt.close()
-    print("📊 Gráfico guardado:", ruta)
-
-
-# =====================
-#  MAIN
-# =====================
+    print(" Gráfico guardado:", ruta)
 
 if __name__ == "__main__":
     # 1) Crear Excel con todas las tablas formateadas
@@ -229,4 +206,4 @@ if __name__ == "__main__":
     grafica_curva_horaria(df_horaria)
     grafica_intensidad_diaria(df_diaria)
 
-    print("✅ Todo generado en carpeta 'output/' (Excel + gráficas).")
+    print(" Todo generado en carpeta 'output/' (Excel + gráficas).")

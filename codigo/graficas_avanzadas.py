@@ -28,9 +28,6 @@ def cargar_datos_base():
     return df_res, df_mensual, df_horaria, df_diaria
 
 
-# =========================
-# GRÁFICA 1: Heatmap mes vs año
-# =========================
 def heatmap_mes_vs_ano(df_mensual: pd.DataFrame):
     df_pivot = df_mensual.pivot(index="month",
                                 columns="year",
@@ -54,12 +51,9 @@ def heatmap_mes_vs_ano(df_mensual: pd.DataFrame):
     ruta = CARPETA_GRAFICAS / "01_heatmap_mes_vs_ano.png"
     plt.savefig(ruta, dpi=200)
     plt.close()
-    print("📊 Heatmap mes vs año guardado:", ruta)
+    print(" Heatmap mes vs año guardado:", ruta)
 
 
-# =========================
-# GRÁFICA 2: Heatmap hora vs periodo COVID
-# =========================
 def heatmap_hora_vs_periodo(df_horaria: pd.DataFrame):
     df = df_horaria.copy()
 
@@ -91,12 +85,9 @@ def heatmap_hora_vs_periodo(df_horaria: pd.DataFrame):
     ruta = CARPETA_GRAFICAS / "02_heatmap_hora_vs_periodo.png"
     plt.savefig(ruta, dpi=200)
     plt.close()
-    print("📊 Heatmap hora vs periodo guardado:", ruta)
+    print(" Heatmap hora vs periodo guardado:", ruta)
 
 
-# =========================
-# Helper: asignar periodo COVID a una fecha (para boxplots)
-# =========================
 def asignar_periodo_fecha(fecha: pd.Timestamp) -> str:
     f = fecha.normalize()  # quitar hora por si acaso
     if f < pd.Timestamp("2020-03-15"):
@@ -111,9 +102,6 @@ def asignar_periodo_fecha(fecha: pd.Timestamp) -> str:
         return "Post-restricciones"
 
 
-# =========================
-# GRÁFICA 3: Boxplot por periodo COVID (intensidad diaria)
-# =========================
 def boxplot_por_periodo(df_diaria: pd.DataFrame):
     df = df_diaria.copy()
     df["fecha_dia"] = pd.to_datetime(df["fecha_dia"])
@@ -137,12 +125,8 @@ def boxplot_por_periodo(df_diaria: pd.DataFrame):
     ruta = CARPETA_GRAFICAS / "03_boxplot_por_periodo.png"
     plt.savefig(ruta, dpi=200)
     plt.close()
-    print("📊 Boxplot por periodo guardado:", ruta)
+    print(" Boxplot por periodo guardado:", ruta)
 
-
-# =========================
-# GRÁFICA 4: Laborables vs sábados vs domingos
-# =========================
 def grafica_laboral_vs_findes(df_diaria: pd.DataFrame):
     df = df_diaria.copy()
     df["fecha_dia"] = pd.to_datetime(df["fecha_dia"])
@@ -181,12 +165,8 @@ def grafica_laboral_vs_findes(df_diaria: pd.DataFrame):
     ruta = CARPETA_GRAFICAS / "04_laboral_vs_findes.png"
     plt.savefig(ruta, dpi=200)
     plt.close()
-    print("📊 Gráfico laborables vs findes guardado:", ruta)
+    print(" Gráfico laborables vs findes guardado:", ruta)
 
-
-# =========================
-# GRÁFICA 5: Top 10 días de mayor intensidad
-# =========================
 def grafica_top10_dias(df_diaria: pd.DataFrame):
     df = df_diaria.copy()
     df["fecha_dia"] = pd.to_datetime(df["fecha_dia"])
@@ -204,12 +184,8 @@ def grafica_top10_dias(df_diaria: pd.DataFrame):
     ruta = CARPETA_GRAFICAS / "05_top10_dias_mas_intensos.png"
     plt.savefig(ruta, dpi=200)
     plt.close()
-    print("📊 Top 10 días guardado:", ruta)
+    print(" Top 10 días guardado:", ruta)
 
-
-# =========================
-# GRÁFICA 6: Intensidad anual agregada
-# =========================
 def grafica_intensidad_anual(df_mensual: pd.DataFrame):
     df_anual = (
         df_mensual
@@ -233,7 +209,7 @@ def grafica_intensidad_anual(df_mensual: pd.DataFrame):
     ruta = CARPETA_GRAFICAS / "06_intensidad_anual.png"
     plt.savefig(ruta, dpi=200)
     plt.close()
-    print("📊 Intensidad anual guardada:", ruta)
+    print(" Intensidad anual guardada:", ruta)
 
 
 def main():
@@ -246,7 +222,7 @@ def main():
     grafica_top10_dias(df_diaria)
     grafica_intensidad_anual(df_mensual)
 
-    print("✅ Gráficas avanzadas generadas en 'output/graficas_avanzadas/'.")
+    print(" Gráficas avanzadas generadas en 'output/graficas_avanzadas/'.")
 
 
 if __name__ == "__main__":

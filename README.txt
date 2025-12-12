@@ -1,14 +1,14 @@
-📘 Proyecto: Análisis del Tráfico en Madrid (2019–2022) y Efecto del COVID-19
+Proyecto: Análisis del Tráfico en Madrid (2019–2022) y Efecto del COVID-19
 
 Asignatura: Grandes Volúmenes de Datos
 
-📌 Objetivo del proyecto
+ Objetivo del proyecto
 
 Analizar cómo evolucionó el tráfico en la ciudad de Madrid entre 2019 y 2022, y estudiar el impacto de la pandemia de COVID-19 utilizando los datos abiertos del Ayuntamiento.
 
 El análisis se centra en la variable intensidad, que representa el número de vehículos que pasan por un punto de medición en una hora.
 
-📊 ¿Qué es la intensidad?
+ ¿Qué es la intensidad?
 
 La intensidad es el indicador principal en el estudio de movilidad.
 Refleja:
@@ -24,14 +24,14 @@ Efecto de restricciones COVID
 Ejemplo:
 Si entre las 08:00–09:00 pasan 1200 vehículos por un sensor → intensidad = 1200.
 
-🗂 Datos utilizados
+ Datos utilizados
 
 Los datos originales están formados por más de 83 archivos ZIP, uno por cada mes entre 2019 y 2022.
 Cada ZIP contiene multitud de registros horarios de sensores de tráfico.
 
 Se procesaron cerca de 900 millones de filas mediante PySpark.
 
-⚙️ Pipeline del proyecto
+Pipeline del proyecto
 1) Ingesta y ordenación
 
 Los ZIP originales se organizan por año:
@@ -87,7 +87,7 @@ Se genera:
 output/resultados_trafico_completo.xlsx
 output/graficas_extra/*.png
 
-📈 Gráficas generadas
+ Gráficas generadas
 
 Incluye:
 
@@ -109,7 +109,7 @@ Heatmap mes-año
 
 Heatmap hora-periodo
 
-📝 Interpretación de resultados
+ Interpretación de resultados
 
 Las gráficas muestran claramente:
 
@@ -123,7 +123,7 @@ Diferencias fuertes entre días laborables y fines de semana
 
 Impacto de las restricciones en horas punta
 
-▶ Cómo ejecutar el proyecto
+ Cómo ejecutar el proyecto
 1) Procesar datos
 python codigo/analisis_trafico_madrid.py
 
