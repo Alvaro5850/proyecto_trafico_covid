@@ -1,16 +1,8 @@
-# Base image
 FROM python:3.11-slim
-
-# Evitar prompts interactivos
 ENV DEBIAN_FRONTEND=noninteractive
-
-# Crear directorio de trabajo
 WORKDIR /app
-
-# Copiar requirements
 COPY requirements.txt .
 
-# Instalar dependencias de sistema necesarias
 RUN apt-get update && apt-get install -y --no-install-recommends \
         wget \
         build-essential \
@@ -18,14 +10,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar Python packages con timeout y reintentos
 RUN pip install --no-cache-dir --default-timeout=1000 --retries=10 -r requirements.txt
 
-# Copiar todo el código al contenedor
 COPY . .
 
-# Exponer puerto si tu app lo requiere (por ejemplo API)
 EXPOSE 8080
 
-# Comando por defecto al iniciar el contenedor
 CMD ["python", "main.py"]

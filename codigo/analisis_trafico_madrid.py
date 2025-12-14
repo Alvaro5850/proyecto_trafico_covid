@@ -1,125 +1,90 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import (
-    col, lit, when, avg, expr,
-    to_timestamp, year, month, dayofmonth, hour,
-    date_format
-)
+from pyspark.sql.functions import col, lit, when, avg, expr, to_timestamp, year, month, hour, date_format
 
 
 def main():
-    spark = (
+    SesionSpark = (
         SparkSession.builder
         .appName("Analisis_trafico_Madrid")
         .getOrCreate()
     )
-    spark.sparkContext.setLogLevel("WARN")
+    SesionSpark.sparkContext.setLogLevel("WARN")
 
-    df = (
-        spark.read
+    Datos = (
+        SesionSpark.read
         .option("header", "true")
         .option("sep", ";")
         .option("inferSchema", "true")
         .csv("data/raw/*/*.csv")
     )
 
-    print("Filas leídas inicialmente:", df.count())
-    print("Columnas:", df.columns)
+    ColumnasNecesarias = [
+        "id", "fecha", "tipo_elem", "intensidad",
+        "ocupacion", "carga", "vmed", "error", "periodo_integracion"
+    ]
+    Datos = Datos.select(*ColumnasNecesarias)
 
-    df = df.select(
-        "id",
-        "fecha",
-        "tipo_elem",
-        "intensidad",
-        "ocupacion",
-        "carga",
-        "vmed",
-        "error",
-        "periodo_integracion"
+    Datos = Datos.withColumn("FechaTimestamp", to_timestamp(col("fecha"), "yyyy-MM-dd HH:mm:ss"))
+
+    Datos = Datos.withColumn("Intensidad", col("intensidad").cast("double"))
+
+    Datos = Datos.filter(col("FechaTimestamp").isNotNull())
+    Datos = Datos.filter(col("Intensidad").isNotNull())
+
+    if "error" in Datos.columns:
+        Datos = Datos.filter(col("error") == lit("N"))
+
+    Datos = Datos.withColumn("Anio", year(col("FechaTimestamp")))
+    Datos = Datos.withColumn("Mes", month(col("FechaTimestamp")))
+    Datos = Datos.withColumn("Hora", hour(col("FechaTimestamp")))
+
+    Datos = Datos.filter((col("Anio") >= lit(2019)) & (col("Anio") <= lit(2022)))
+
+    Datos = Datos.withColumn("FechaDia", date_format(col("FechaTimestamp"), "yyyy-MM-dd"))
+
+    Datos = Datos.withColumn(
+        "PeriodoCovid",
+        when(col("FechaDia") < lit("2020-03-15"), lit("Pre-COVID"))
+        .when((col("FechaDia") >= lit("2020-03-15")) & (col("FechaDia") <= lit("2020-06-21")), lit("Confinamiento"))
+        .when((col("FechaDia") >= lit("2020-06-22")) & (col("FechaDia") <= lit("2020-10-25")), lit("Desescalada"))
+        .when((col("FechaDia") >= lit("2020-10-26")) & (col("FechaDia") <= lit("2021-05-09")), lit("2º estado de alarma"))
+        .otherwise(lit("Post-restricciones"))
     )
 
-    df = df.withColumn("fecha_ts", to_timestamp(col("fecha"), "yyyy-MM-dd HH:mm:ss"))
+    Datos.cache()
 
-    print("Ejemplo de fechas parseadas:")
-    df.select("fecha", "fecha_ts").show(5, truncate=False)
-
-    df = df.withColumn("intensidad", col("intensidad").cast("double"))
-    df = df.filter(col("intensidad").isNotNull())
-    print("Filas tras filtrar intensidad no nula:", df.count())
-
-    df = df.withColumn("year", year("fecha_ts"))
-    df = df.withColumn("month", month("fecha_ts"))
-    df = df.withColumn("day", dayofmonth("fecha_ts"))
-    df = df.withColumn("hour", hour("fecha_ts"))
-
-    df = df.filter((col("year") >= 2019) & (col("year") <= 2022))
-    print("Filas tras filtrar años 2019–2022:", df.count())
-
-    df = df.withColumn("fecha_ymd", date_format(col("fecha_ts"), "yyyy-MM-dd"))
-    df = df.withColumn("fecha_dia", col("fecha_ymd"))
-
-    print("Filas listas para agrupar (2019–2022, intensidad!=null):", df.count())
-
-    df = df.withColumn(
-        "periodo_covid",
-        when(col("fecha_ymd") < lit("2020-03-15"), "Pre-COVID")
-        .when(
-            (col("fecha_ymd") >= lit("2020-03-15")) &
-            (col("fecha_ymd") <= lit("2020-06-21")),
-            "Confinamiento"
-        )
-        .when(
-            (col("fecha_ymd") >= lit("2020-06-22")) &
-            (col("fecha_ymd") <= lit("2020-10-25")),
-            "Desescalada"
-        )
-        .when(
-            (col("fecha_ymd") >= lit("2020-10-26")) &
-            (col("fecha_ymd") <= lit("2021-05-09")),
-            "2º estado de alarma"
-        )
-        .otherwise("Post-restricciones")
-    )
-
-    df.cache()
-    print("Filas totales (con periodo_covid):", df.count())
-
-    resumen_periodos = (
-        df.groupBy("periodo_covid")
+    ResumenPeriodos = (
+        Datos.groupBy("PeriodoCovid")
         .agg(
-            avg("intensidad").alias("intensidad_media"),
-            expr("percentile_approx(intensidad, 0.5)").alias("intensidad_mediana"),
+            avg(col("Intensidad")).alias("IntensidadMedia"),
+            expr("percentile_approx(Intensidad, 0.5)").alias("IntensidadMediana")
         )
-        .orderBy("periodo_covid")
+        .orderBy("PeriodoCovid")
     )
-    resumen_periodos.write.mode("overwrite").option("header", "true") \
-        .csv("output/resumen_periodos")
+    ResumenPeriodos.write.mode("overwrite").option("header", "true").csv("output/resumen_periodos")
 
-    intensidad_mensual = (
-        df.groupBy("year", "month")
-        .agg(avg("intensidad").alias("intensidad_media"))
-        .orderBy("year", "month")
+    IntensidadMensual = (
+        Datos.groupBy("Anio", "Mes")
+        .agg(avg(col("Intensidad")).alias("IntensidadMedia"))
+        .orderBy("Anio", "Mes")
     )
-    intensidad_mensual.write.mode("overwrite").option("header", "true") \
-        .csv("output/intensidad_mensual")
+    IntensidadMensual.write.mode("overwrite").option("header", "true").csv("output/intensidad_mensual")
 
-    curva_horaria = (
-        df.groupBy("periodo_covid", "hour")
-        .agg(avg("intensidad").alias("intensidad_media"))
-        .orderBy("periodo_covid", "hour")
+    CurvaHoraria = (
+        Datos.groupBy("PeriodoCovid", "Hora")
+        .agg(avg(col("Intensidad")).alias("IntensidadMedia"))
+        .orderBy("PeriodoCovid", "Hora")
     )
-    curva_horaria.write.mode("overwrite").option("header", "true") \
-        .csv("output/curva_horaria")
+    CurvaHoraria.write.mode("overwrite").option("header", "true").csv("output/curva_horaria")
 
-    intensidad_diaria = (
-        df.groupBy("fecha_dia")
-        .agg(avg("intensidad").alias("intensidad_media_dia"))
-        .orderBy("fecha_dia")
+    IntensidadDiaria = (
+        Datos.groupBy("FechaDia")
+        .agg(avg(col("Intensidad")).alias("IntensidadMediaDia"))
+        .orderBy("FechaDia")
     )
-    intensidad_diaria.write.mode("overwrite").option("header", "true") \
-        .csv("output/intensidad_diaria")
+    IntensidadDiaria.write.mode("overwrite").option("header", "true").csv("output/intensidad_diaria")
 
-    print(" Spark terminado. CSV generados en carpeta 'output/'.")
-    spark.stop()
+    SesionSpark.stop()
 
 
 if __name__ == "__main__":
