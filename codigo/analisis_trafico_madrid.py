@@ -1,3 +1,6 @@
+#Asignatura:Grandes Volúmenes de Datos
+#Tarea: PL Final Analisis del Trafico en Madrid durante COVID-19
+#Integrantes: Álvaro Salvador, Pablo Cuevas, José Luis Blázquez, Jorge Esgueva
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, lit, when, avg, expr, to_timestamp, year, month, hour, date_format
 
@@ -32,6 +35,7 @@ def main():
     Datos = Datos.filter(col("Intensidad").isNotNull())
 
     if "error" in Datos.columns:
+        
         Datos = Datos.filter(col("error") == lit("N"))
 
     Datos = Datos.withColumn("Anio", year(col("FechaTimestamp")))

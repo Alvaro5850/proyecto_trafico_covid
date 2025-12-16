@@ -1,10 +1,11 @@
+#Asignatura:Grandes Volúmenes de Datos
+#Tarea: PL Final Analisis del Trafico en Madrid durante COVID-19
+#Integrantes: Álvaro Salvador, Pablo Cuevas, José Luis Blázquez, Jorge Esgueva
 import os
 from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
-
-
 
 #Rutas base
 
@@ -17,12 +18,11 @@ CARPETA_GRAFICAS_EXTRA.mkdir(parents=True, exist_ok=True)
 plt.rcParams["figure.figsize"] = (10, 6)
 plt.rcParams["font.size"] = 11
 
-
-
 #Contenedor de datos
-
 class DatosProyecto:
+
     def __init__(self):
+
         self.df_res = None
         self.df_mensual = None
         self.df_horaria = None
@@ -38,10 +38,12 @@ class DatosProyecto:
 
 #Lectura y formato
 def leer_csv_unico(carpeta: Path, datos: DatosProyecto, destino: str):
+
     archivos = []
-    for f in os.listdir(carpeta):
-        if f.endswith(".csv"):
-            archivos.append(f)
+
+    for archivo in os.listdir(carpeta):
+        if archivo.endswith(".csv"):
+            archivos.append(archivo)
 
     if len(archivos) == 0:
         raise FileNotFoundError("No hay CSV en " + str(carpeta))
@@ -65,16 +67,19 @@ def leer_csv_unico(carpeta: Path, datos: DatosProyecto, destino: str):
 
 
 def redondear_columnas(df: pd.DataFrame, columnas, decimales: int):
+
     i = 0
+
     while i < len(columnas):
         col = columnas[i]
         if col in df.columns:
             df[col] = df[col].astype(float)
             df[col] = df[col].round(decimales)
-        i += 1
+        i+= 1
 
 
 def cargar_datos_base(datos: DatosProyecto):
+
     leer_csv_unico(BASE_OUTPUT / "resumen_periodos", datos, "df_res")
     leer_csv_unico(BASE_OUTPUT / "intensidad_mensual", datos, "df_mensual")
     leer_csv_unico(BASE_OUTPUT / "curva_horaria", datos, "df_horaria")
@@ -88,6 +93,7 @@ def cargar_datos_base(datos: DatosProyecto):
 
 #Cálculos extra 
 def calcular_intensidad_anual(datos: DatosProyecto):
+
     df_mensual = datos.df_mensual.copy()
 
     #Media anual
@@ -103,16 +109,19 @@ def calcular_intensidad_anual(datos: DatosProyecto):
 
 
 def calcular_laboral_vs_findes(datos: DatosProyecto):
+
     df = datos.df_diaria.copy()
     df["fecha_dia"] = pd.to_datetime(df["fecha_dia"])
     df["dia_semana"] = df["fecha_dia"].dt.dayofweek  # 0 lunes ... 6 domingo
 
     #Clasificación explícita 
     tipos = []
-    for d in df["dia_semana"]:
-        if d < 5:
+
+    for dia in df["dia_semana"]:
+
+        if dia < 5:
             tipos.append("Laborable")
-        elif d == 5:
+        elif dia == 5:
             tipos.append("Sábado")
         else:
             tipos.append("Domingo")
@@ -133,6 +142,7 @@ def calcular_laboral_vs_findes(datos: DatosProyecto):
 
 
 def calcular_top_dias(datos: DatosProyecto, n: int):
+
     df = datos.df_diaria.copy()
     df["fecha_dia"] = pd.to_datetime(df["fecha_dia"])
 
@@ -170,8 +180,8 @@ def calcular_comparativa_pre_post(datos: DatosProyecto):
 
 
 #Excel completo
-
 def crear_excel_completo(datos: DatosProyecto):
+
     writer = pd.ExcelWriter(EXCEL_SALIDA, engine="openpyxl")
 
     datos.df_res.to_excel(writer, sheet_name="Resumen_periodos", index=False)
@@ -193,6 +203,7 @@ def crear_excel_completo(datos: DatosProyecto):
 #Gráficas extra
 
 def grafica_intensidad_anual(datos: DatosProyecto):
+
     df = datos.df_anual
 
     plt.figure()
@@ -274,10 +285,11 @@ def heatmap_mes_vs_ano(datos: DatosProyecto):
 
 
 def heatmap_hora_vs_periodo(datos: DatosProyecto):
+
     df = datos.df_horaria.copy()
 
     orden = ["Pre-COVID", "Confinamiento", "Desescalada", "2º estado de alarma", "Post-restricciones"]
-    df["periodo_covid"] = pd.Categorical(df["periodo_covid"], categories=orden, ordered=True)
+    df["periodo_covid"] = pd.Categorical(df["periodo_covid"],categories=orden, ordered=True)
     df = df.sort_values(["periodo_covid", "hour"])
 
     df_pivot = df.pivot(index="hour", columns="periodo_covid", values="intensidad_media")
@@ -298,11 +310,7 @@ def heatmap_hora_vs_periodo(datos: DatosProyecto):
     plt.close()
     print("Heatmap guardado:", ruta)
 
-
-
 #Ejecución principal
-
-
 def main():
     datos = DatosProyecto()
 

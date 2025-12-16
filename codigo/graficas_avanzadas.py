@@ -1,3 +1,6 @@
+#Asignatura:Grandes Volúmenes de Datos
+#Tarea: PL Final Analisis del Trafico en Madrid durante COVID-19
+#Integrantes: Álvaro Salvador, Pablo Cuevas, José Luis Blázquez, Jorge Esgueva
 import os
 from pathlib import Path
 
@@ -16,11 +19,9 @@ plt.rcParams["font.size"] = 11
 
 
 
-#Lectura de datos
-
-
+#Esta función lee todos los CSV de una carpeta generada por Spark y devuelve un único DataFrame de Pandas con todos los datos concatenados
 def leer_csv_spark(carpeta):
-    """Lee todos los CSV de una carpeta generada por Spark y devuelve un único DataFrame de Pandas con todos los datos concatenados."""
+
     rutas_csv = []
 
     for nombre in os.listdir(carpeta):
@@ -39,11 +40,9 @@ def leer_csv_spark(carpeta):
     df_final = pd.concat(dataframes, ignore_index=True)
     return df_final
 
-
+#Esta función carga las tablas agregadas producidas por Spark
 def cargar_datos_base():
-    """
-    Carga las tablas agregadas producidas por Spark.
-    """
+
     resumen_periodos = leer_csv_spark(CARPETA_SALIDA / "resumen_periodos")
     intensidad_mensual = leer_csv_spark(CARPETA_SALIDA / "intensidad_mensual")
     curva_horaria = leer_csv_spark(CARPETA_SALIDA / "curva_horaria")
@@ -55,8 +54,9 @@ def cargar_datos_base():
 
 #Funciones de apoyo
 
+#Esta función asigna un periodo COVID según la fecha
 def obtener_periodo_covid_por_fecha(fecha):
-    """Asigna un periodo COVID según la fecha"""
+
     fecha_normalizada = fecha.normalize()
 
     if fecha_normalizada < pd.Timestamp("2020-03-15"):
@@ -70,9 +70,10 @@ def obtener_periodo_covid_por_fecha(fecha):
 
     return "Post-restricciones"
 
+#Esta función clasifica el día como Laborable, Sábado o Domingo. dayofweek: 0 = lunes, 6 = domingo"
 
 def obtener_tipo_dia(dia_semana):
-    """Clasifica el día como Laborable, Sábado o Domingo. dayofweek: 0 = lunes, 6 = domingo"""
+
     if dia_semana < 5:
         return "Laborable"
     if dia_semana == 5:
@@ -82,9 +83,9 @@ def obtener_tipo_dia(dia_semana):
 
 
 #Gráficas avanzadas
-
+#Mapa de calor: Mes (filas) vs Año (columnas) con intensidad media.
 def grafica_heatmap_mes_vs_anio(intensidad_mensual):
-    """Mapa de calor: Mes (filas) vs Año (columnas) con intensidad media."""
+
     tabla_pivote = intensidad_mensual.pivot(
         index="month",
         columns="year",
@@ -156,9 +157,9 @@ def grafica_heatmap_hora_vs_periodo(curva_horaria):
     plt.savefig(ruta, dpi=220)
     plt.close()
 
-
+#Boxplot: distribución de la intensidad media diaria por periodo COVID.
 def grafica_boxplot_por_periodo(intensidad_diaria):
-    """Boxplot: distribución de la intensidad media diaria por periodo COVID."""
+
     datos = intensidad_diaria.copy()
     datos["fecha_dia"] = pd.to_datetime(datos["fecha_dia"])
     datos["periodo_covid"] = datos["fecha_dia"].apply(obtener_periodo_covid_por_fecha)
@@ -191,9 +192,9 @@ def grafica_boxplot_por_periodo(intensidad_diaria):
     plt.savefig(ruta, dpi=220)
     plt.close()
 
-
+#Barras: intensidad media diaria según tipo de día (laborable, sábado, domingo)
 def grafica_laborables_vs_fin_de_semana(intensidad_diaria):
-    """Barras: intensidad media diaria según tipo de día (laborable, sábado, domingo)."""
+
     datos = intensidad_diaria.copy()
     datos["fecha_dia"] = pd.to_datetime(datos["fecha_dia"])
     datos["dia_semana"] = datos["fecha_dia"].dt.dayofweek
@@ -222,9 +223,9 @@ def grafica_laborables_vs_fin_de_semana(intensidad_diaria):
     plt.savefig(ruta, dpi=220)
     plt.close()
 
-
+#Barras horizontales: Top 10 días con mayor intensidad media diaria.
 def grafica_top_10_dias_mas_intensos(intensidad_diaria):
-    """Barras horizontales: Top 10 días con mayor intensidad media diaria."""
+ 
     datos = intensidad_diaria.copy()
     datos["fecha_dia"] = pd.to_datetime(datos["fecha_dia"])
 
@@ -244,9 +245,9 @@ def grafica_top_10_dias_mas_intensos(intensidad_diaria):
     plt.savefig(ruta, dpi=220)
     plt.close()
 
-
+#Línea: evolución de la intensidad media anual.
 def grafica_intensidad_media_anual(intensidad_mensual):
-    """Línea: evolución de la intensidad media anual."""
+ 
     intensidad_anual = (
         intensidad_mensual
         .groupby("year", as_index=False)["intensidad_media"]

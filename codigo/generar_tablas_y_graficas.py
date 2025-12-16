@@ -1,3 +1,6 @@
+#Asignatura:Grandes Volúmenes de Datos
+#Tarea: PL Final Analisis del Trafico en Madrid durante COVID-19
+#Integrantes: Álvaro Salvador, Pablo Cuevas, José Luis Blázquez, Jorge Esgueva
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -11,8 +14,8 @@ os.makedirs(CARPETA_GRAFICAS, exist_ok=True)
 plt.rcParams["figure.figsize"] = (10, 6)
 plt.rcParams["font.size"] = 11
 
+#Esta función lee todos los CSV de una carpeta y los concatena en un único DataFrame
 def leer_csv_unico(ruta_carpeta: str) -> pd.DataFrame:
-    """Lee todos los CSV de una carpeta y los concatena en un único DataFrame."""
     archivos = [f for f in os.listdir(ruta_carpeta) if f.endswith(".csv")]
     if not archivos:
         raise FileNotFoundError(f"No hay CSV en {ruta_carpeta}")
@@ -22,9 +25,9 @@ def leer_csv_unico(ruta_carpeta: str) -> pd.DataFrame:
 
 def formatear_numeros(df: pd.DataFrame, columnas, decimales: int = 2) -> pd.DataFrame:
     df = df.copy()
-    for c in columnas:
-        if c in df.columns:
-            df[c] = df[c].astype(float).round(decimales)
+    for columna in columnas:
+        if columna in df.columns:
+            df[columna] = df[columna].astype(float).round(decimales)
     return df
 
 
@@ -57,8 +60,9 @@ def crear_excel():
     print(f" Excel generado en: {EXCEL_SALIDA}")
     return df_res, df_mensual, df_horaria, df_diaria
 
+#En esta gŕafica se  calcula la intensidad media por periodo y ordena intentando usar el orden lógico de la pandemia, pero solo con los periodos que existan realmente
 def grafica_barras_resumen(df_res: pd.DataFrame):
-    """Barra por periodo COVID, calcula la intensidad media por periodo y ordena intentando usar el orden lógico de la pandemia, pero solo con los periodos que existan realmente"""
+  
     if "periodo_covid" not in df_res.columns:
         print(" No se encuentra la columna 'periodo_covid' en df_res. Saltando gráfico 01.")
         return
@@ -117,7 +121,9 @@ def grafica_barras_resumen(df_res: pd.DataFrame):
 
 
 def grafica_lineas_mensual(df_mensual: pd.DataFrame):
+
     plt.figure()
+
     for year, df_y in df_mensual.groupby("year"):
         df_y = df_y.sort_values("month")
         plt.plot(
@@ -141,6 +147,7 @@ def grafica_lineas_mensual(df_mensual: pd.DataFrame):
 
 
 def grafica_curva_horaria(df_horaria: pd.DataFrame):
+
     plt.figure()
     for periodo, df_p in df_horaria.groupby("periodo_covid"):
         df_p = df_p.sort_values("hour")
